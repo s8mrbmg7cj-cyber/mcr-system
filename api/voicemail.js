@@ -1,24 +1,24 @@
-const twilio = require('twilio');
+export default function handler(req, res) {
+  const voice = "Polly.Joanna-Neural";
 
-module.exports = async function handler(req, res) {
-  const twiml = new twilio.twiml.VoiceResponse();
+  res.setHeader("Content-Type", "text/xml");
 
-  twiml.say(
-    { voice: 'alice' },
-    'Please leave your name, number, and how we can help, and we will get back to you as soon as possible.'
-  );
+  res.status(200).send(`<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+  <Say voice="${voice}">
+    Please leave your name, phone number, and how we can help.
+    We will get back to you as soon as possible.
+  </Say>
 
-  twiml.record({
-    maxLength: 120,
-    playBeep: true,
-    transcribe: true,
-    recordingStatusCallback: '/api/voicemail-status',
-    recordingStatusCallbackMethod: 'POST',
-  });
+  <Record
+    maxLength="120"
+    playBeep="true"
+    transcribe="true"
+    recordingStatusCallback="/api/voicemail-status"
+    recordingStatusCallbackMethod="POST"
+  />
 
-  twiml.say({ voice: 'alice' }, 'We did not receive a message. Goodbye.');
-  twiml.hangup();
-
-  res.setHeader('Content-Type', 'text/xml');
-  res.status(200).send(twiml.toString());
-};
+  <Say voice="${voice}">We did not receive a message. Goodbye.</Say>
+  <Hangup/>
+</Response>`);
+}
